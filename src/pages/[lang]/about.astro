@@ -1,0 +1,60 @@
+---
+import { getEntry, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { LOCALES, type Locale } from "../../lib/site-config";
+
+export async function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const entry = await getEntry("pages", `${lang}/about`);
+if (!entry) {
+  throw new Error(`About page missing for ${lang}`);
+}
+const { Content } = await render(entry);
+
+const labels = {
+  vi: { kicker: "/vi/about" },
+  en: { kicker: "/en/about" },
+};
+---
+
+<BaseLayout title={entry.data.title} lang={lang}>
+  <div class="canvas page">
+    <header class="page-head layout-magazine">
+      <aside class="marginalia-l page-aside" aria-hidden="true">
+        <span class="kicker">{labels[lang].kicker}</span>
+      </aside>
+      <div class="body-r" style="max-width: none">
+        <!-- Title comes from the markdown's H1; we don't duplicate it here. -->
+      </div>
+    </header>
+
+    <div class="layout-magazine about-body-wrap">
+      <div class="marginalia-l" aria-hidden="true" />
+      <article class="body-r about-article prose">
+        <Content />
+      </article>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--space-8) var(--space-section); }
+  .page-head { padding-block: var(--space-6) var(--space-4); align-items: start; }
+  .page-aside {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+    text-align: right;
+    padding-top: 0.6em;
+    letter-spacing: 0.08em;
+  }
+  .kicker { color: var(--fg-muted); text-transform: lowercase; }
+  .about-body-wrap { padding-block: var(--space-4); }
+  .about-article { max-width: var(--content-width); }
+  @media (max-width: 720px) {
+    .page-aside { text-align: left; padding-top: 0; margin-bottom: var(--space-3); }
+  }
+</style>

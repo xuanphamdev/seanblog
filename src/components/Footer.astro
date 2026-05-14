@@ -1,0 +1,47 @@
+---
+import { site, ui, type Locale } from "../lib/site-config";
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="footer-inner canvas">
+    <p class="footer-copy">
+      © {year} {site.author} ·
+      <a href={`/rss-${lang}.xml`} class="footer-link">{ui.footer.rss[lang]}</a>
+      ·
+      <a href={site.github} target="_blank" rel="noopener" class="footer-link">
+        {ui.footer.github[lang]}
+      </a>
+    </p>
+    <p class="footer-built">{ui.footer.builtWith[lang]}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-section);
+    border-top: 1px solid var(--border-subtle);
+    padding-block: var(--space-8);
+  }
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+  }
+  .footer-link {
+    color: var(--fg-muted);
+    transition: color var(--duration-fast) var(--ease);
+  }
+  .footer-link:hover { color: var(--accent); }
+  .footer-built { color: var(--fg-subtle); }
+</style>

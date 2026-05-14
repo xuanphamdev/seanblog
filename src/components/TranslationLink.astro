@@ -1,0 +1,60 @@
+---
+import { getTranslation } from "../lib/translations";
+import { postUrl, type Post } from "../lib/posts";
+import { ui, type Locale } from "../lib/site-config";
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const lang: Locale = post.id.startsWith("en/") ? "en" : "vi";
+const target: Locale = lang === "vi" ? "en" : "vi";
+const translation = await getTranslation(post, target);
+---
+
+{
+  translation ? (
+    <a href={postUrl(translation)} class="translation-link" lang={target}>
+      <span class="translation-arrow">↔</span>
+      {ui.meta.translatedAvailable[lang]}
+      <span class="translation-lang">[{target.toUpperCase()}]</span>
+    </a>
+  ) : (
+    <span class="translation-link disabled" aria-disabled="true">
+      <span class="translation-arrow">↔</span>
+      {ui.meta.noTranslation[lang]}
+    </span>
+  )
+}
+
+<style>
+  .translation-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    transition:
+      color var(--duration-fast) var(--ease),
+      border-color var(--duration-fast) var(--ease);
+  }
+  .translation-link:hover:not(.disabled) {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .translation-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .translation-arrow {
+    color: var(--accent);
+    opacity: 0.7;
+  }
+  .translation-lang {
+    color: var(--fg-subtle);
+  }
+</style>

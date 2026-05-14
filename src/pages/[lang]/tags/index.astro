@@ -1,0 +1,85 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import TagCloud from "../../../components/TagCloud.astro";
+import { getAllTags } from "../../../lib/tags";
+import { LOCALES, type Locale } from "../../../lib/site-config";
+
+export async function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const tags = await getAllTags(lang);
+
+const titles = {
+  vi: { title: "Thẻ", lede: "Tất cả thẻ. Kích cỡ phản ánh số bài viết.", path: "tags" },
+  en: { title: "Tags", lede: "All tags. Size reflects post count.", path: "tags" },
+};
+const t = titles[lang];
+---
+
+<BaseLayout title={t.title} lang={lang}>
+  <div class="canvas page">
+    <header class="page-head layout-magazine">
+      <aside class="marginalia-l page-aside" aria-hidden="true">
+        <span class="kicker">/{lang}/{t.path}</span>
+      </aside>
+      <div class="body-r" style="max-width: none">
+        <h1 class="title">{t.title}</h1>
+        <p class="lede">{t.lede}</p>
+      </div>
+    </header>
+
+    <hr class="rule" aria-hidden="true" />
+
+    <section class="cloud-section layout-magazine">
+      <div class="marginalia-l" aria-hidden="true" />
+      <div class="body-r" style="max-width: none">
+        <TagCloud tags={tags} lang={lang} />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--space-8) var(--space-section); }
+  .page-head { padding-block: var(--space-6) var(--space-10); align-items: start; }
+  .page-aside {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+    text-align: right;
+    padding-top: 0.6em;
+    letter-spacing: 0.08em;
+  }
+  .kicker { color: var(--fg-muted); text-transform: lowercase; }
+  .title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 1.8rem + 4vw, 5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .lede {
+    margin-top: var(--space-4);
+    font-size: var(--text-lg);
+    color: var(--fg-muted);
+    max-width: 56ch;
+  }
+  .rule {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--border-subtle) 6%,
+      var(--border-subtle) 94%,
+      transparent
+    );
+    margin: 0;
+  }
+  .cloud-section { padding-block: var(--space-10); }
+  @media (max-width: 720px) {
+    .page-aside { text-align: left; padding-top: 0; margin-bottom: var(--space-3); }
+  }
+</style>

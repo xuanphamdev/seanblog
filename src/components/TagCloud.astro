@@ -1,0 +1,95 @@
+---
+import type { TagInfo } from "../lib/tags";
+import type { Locale } from "../lib/site-config";
+
+interface Props {
+  tags: TagInfo[];
+  lang: Locale;
+}
+const { tags, lang } = Astro.props;
+
+const labels = {
+  vi: { posts: "bài", empty: "Chưa có thẻ nào." },
+  en: { posts: "posts", empty: "No tags yet." },
+};
+const t = labels[lang];
+---
+
+<div class="tag-cloud">
+  {
+    tags.map((tag) => (
+      <a
+        href={`/${lang}/tags/${tag.slug}/`}
+        class="tag-link"
+        title={`${tag.count} ${labels[lang].posts}`}
+      >
+        <span class="tag-name"><span class="tag-hash">#</span>{tag.raw}</span>
+        <span class="tag-count">{tag.count}</span>
+      </a>
+    ))
+  }
+  {
+    tags.length === 0 && (
+      <p class="empty">
+        {t.empty}
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+    padding-block: var(--space-4);
+    line-height: 1.4;
+  }
+  .tag-link {
+    display: inline-flex;
+    gap: var(--space-3);
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+    background: color-mix(in oklch, var(--paper) 86%, transparent);
+    transition:
+      border-color var(--duration-fast) var(--ease),
+      background var(--duration-fast) var(--ease),
+      color var(--duration-fast) var(--ease),
+      transform var(--duration-fast) var(--ease);
+  }
+  .tag-link:hover,
+  .tag-link:focus-visible {
+    border-color: color-mix(in oklch, var(--accent) 45%, var(--border-subtle));
+    background: var(--accent-soft);
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .tag-name {
+    white-space: nowrap;
+  }
+  .tag-hash {
+    color: var(--accent);
+    opacity: 0.6;
+  }
+  .tag-count {
+    display: inline-grid;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--fg-subtle);
+    font-size: var(--text-xs);
+  }
+  .empty {
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+</style>

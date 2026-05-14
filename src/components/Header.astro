@@ -1,0 +1,132 @@
+---
+import { site, ui, type Locale } from "../lib/site-config";
+import LangSwitch from "./LangSwitch.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+
+const navItems = [
+  { href: `/${lang}/`, label: ui.nav.posts[lang] },
+  { href: `/${lang}/tags/`, label: ui.nav.tags[lang] },
+  { href: `/${lang}/about/`, label: ui.nav.about[lang] },
+];
+---
+
+<header class="site-header">
+  <div class="header-inner canvas">
+    <a href={`/${lang}/`} class="brand" aria-label={site.title}>
+      <span class="brand-name">{site.title.toLowerCase()}</span><span
+        class="brand-dot">.</span
+      >
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      {
+        navItems.map((item) => (
+          <a href={item.href} class="nav-link">
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="header-actions">
+      <button
+        id="search-trigger"
+        type="button"
+        class="search-trigger"
+        aria-label={ui.nav.search[lang]}
+      >
+        <span class="search-text">{ui.nav.search[lang]}</span>
+        <kbd class="search-kbd">{ui.search.kbd}</kbd>
+      </button>
+      <LangSwitch lang={lang} />
+      <ThemeToggle lang={lang} />
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--border-subtle);
+    background: color-mix(in oklch, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding-block: var(--space-4);
+  }
+
+  .brand {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    line-height: 1;
+  }
+  .brand-dot { color: var(--accent); }
+  .brand:hover { color: var(--fg); opacity: 0.9; }
+
+  .primary-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    margin-left: var(--space-2);
+  }
+  .nav-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    transition: color var(--duration-fast) var(--ease);
+  }
+  .nav-link:hover { color: var(--accent); }
+
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .search-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    transition:
+      color var(--duration-fast) var(--ease),
+      border-color var(--duration-fast) var(--ease);
+  }
+  .search-trigger:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+  }
+  .search-kbd {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0 var(--space-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 3px;
+    color: var(--fg-subtle);
+    background: var(--bg-elevated);
+  }
+
+  @media (max-width: 640px) {
+    .header-inner { gap: var(--space-3); flex-wrap: wrap; }
+    .primary-nav { gap: var(--space-3); margin-left: 0; order: 3; width: 100%; }
+    .search-text { display: none; }
+  }
+</style>

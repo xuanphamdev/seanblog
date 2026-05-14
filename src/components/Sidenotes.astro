@@ -1,0 +1,58 @@
+---
+/**
+ * Sidenotes — relocates markdown footnotes into right-margin callouts (Tufte-style).
+ *
+ * Markdown `[^1]` produces:
+ *   inline: <sup><a id="user-content-fnref-1" href="#user-content-fn-1">1</a></sup>
+ *   bottom: <section class="footnotes"><ol><li id="user-content-fn-1">...</li></ol></section>
+ *
+ * This script clones each <li> content next to its matching <sup>,
+ * and hides the bottom section. CSS handles the right-margin float on wide viewports.
+ */
+---
+
+<script is:inline>
+  (() => {
+    function init() {
+      const article = document.querySelector(".prose");
+      if (!article) return;
+
+      const section = article.querySelector(".footnotes");
+      if (!section || section.classList.contains("has-sidenotes")) return;
+
+      // GFM footnotes may use "fn-N" or "user-content-fn-N" depending on plugin config
+      const items = section.querySelectorAll('li[id^="fn-"], li[id^="user-content-fn-"]');
+
+      items.forEach((li) => {
+        const id = li.id;
+        const num = id.replace(/^(user-content-)?fn-/, "");
+        const ref = document.getElementById(`fnref-${num}`)
+          || document.getElementById(`user-content-fnref-${num}`);
+        if (!ref) return;
+
+        const clone = li.cloneNode(true);
+        // Strip back-references (the ↩ arrow link)
+        clone.querySelectorAll("a.data-footnote-backref, .data-footnote-backref")
+          .forEach((el) => el.remove());
+
+        const aside = document.createElement("aside");
+        aside.className = "sidenote";
+        aside.setAttribute("role", "note");
+        aside.innerHTML =
+          `<span class="sidenote-num">${num}.</span>` +
+          (clone.innerHTML || "").trim();
+
+        // Insert after the <sup> that contains the reference link
+        const sup = ref.closest("sup") || ref.parentElement;
+        if (sup && sup.parentElement) {
+          sup.after(aside);
+        }
+      });
+
+      section.classList.add("has-sidenotes");
+    }
+
+    init();
+    document.addEventListener("astro:page-load", init);
+  })();
+</script>

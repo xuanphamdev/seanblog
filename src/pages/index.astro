@@ -1,0 +1,5 @@
+---
+// Root fallback. Cloudflare `_redirects` handles `/` → `/vi/` on production.
+// In dev (where _redirects isn't applied), this meta-refresh fallback covers it.
+return Astro.redirect("/vi/", 302);
+---

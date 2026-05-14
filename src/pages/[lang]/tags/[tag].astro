@@ -1,0 +1,101 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import PostCard from "../../../components/PostCard.astro";
+import { getAllTags, getPostsByTag } from "../../../lib/tags";
+import { LOCALES, type Locale } from "../../../lib/site-config";
+
+export async function getStaticPaths() {
+  const out: Array<{ params: { lang: Locale; tag: string }; props: { raw: string } }> = [];
+  for (const lang of LOCALES) {
+    const tags = await getAllTags(lang);
+    for (const t of tags) {
+      out.push({ params: { lang, tag: t.slug }, props: { raw: t.raw } });
+    }
+  }
+  return out;
+}
+
+const lang = Astro.params.lang as Locale;
+const tag = Astro.params.tag as string;
+const { raw } = Astro.props;
+const posts = await getPostsByTag(lang, tag);
+
+const labels = {
+  vi: { count: "bài viết" },
+  en: { count: "posts" },
+};
+const t = labels[lang];
+---
+
+<BaseLayout title={`#${raw}`} lang={lang}>
+  <div class="canvas page">
+    <header class="page-head layout-magazine">
+      <aside class="marginalia-l page-aside" aria-hidden="true">
+        <a href={`/${lang}/tags/`} class="kicker">/{lang}/tags</a>
+      </aside>
+      <div class="body-r" style="max-width: none">
+        <h1 class="title">
+          <span class="hash">#</span>{raw}
+        </h1>
+        <p class="meta">{posts.length} {t.count}</p>
+      </div>
+    </header>
+
+    <hr class="rule" aria-hidden="true" />
+
+    <section class="posts-section">
+      <div class="post-stream">
+        {posts.map((post, i) => <PostCard post={post} index={i + 1} />)}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--space-8) var(--space-section); }
+  .page-head { padding-block: var(--space-6) var(--space-10); align-items: start; }
+  .page-aside {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-align: right;
+    padding-top: 0.6em;
+    letter-spacing: 0.08em;
+  }
+  .kicker {
+    color: var(--fg-muted);
+    text-transform: lowercase;
+    transition: color var(--duration-fast) var(--ease);
+  }
+  .kicker:hover { color: var(--accent); }
+  .title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 1.8rem + 4vw, 5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .hash { color: var(--accent); opacity: 0.7; }
+  .meta {
+    margin-top: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+  }
+  .rule {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--border-subtle) 6%,
+      var(--border-subtle) 94%,
+      transparent
+    );
+    margin: 0;
+  }
+  .posts-section { padding-block: var(--space-6); }
+  .post-stream { display: flex; flex-direction: column; }
+  @media (max-width: 720px) {
+    .page-aside { text-align: left; padding-top: 0; margin-bottom: var(--space-3); }
+  }
+</style>

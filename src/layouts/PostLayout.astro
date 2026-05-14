@@ -1,0 +1,209 @@
+---
+import type { MarkdownHeading } from "astro";
+import BaseLayout from "./BaseLayout.astro";
+import TableOfContents from "../components/TableOfContents.astro";
+import TranslationLink from "../components/TranslationLink.astro";
+import ReadingProgress from "../components/ReadingProgress.astro";
+import Sidenotes from "../components/Sidenotes.astro";
+import { readingTime } from "../lib/reading-time";
+import { getPostLocale, getPostSlug, type Post } from "../lib/posts";
+import { slugifyTag } from "../lib/tags";
+
+interface Props {
+  post: Post;
+  headings: MarkdownHeading[];
+}
+const { post, headings } = Astro.props;
+const lang = getPostLocale(post);
+const slug = getPostSlug(post);
+const stats = readingTime(post.body ?? "", lang);
+const ogImage = `/og/${lang}/${slug}.png`;
+
+const showToc =
+  stats.words >= 600 &&
+  headings.filter((h) => h.depth >= 2 && h.depth <= 3).length >= 2;
+
+const d = post.data.date;
+const dateFmt = `${d.getUTCFullYear()}·${String(d.getUTCMonth() + 1).padStart(2, "0")}·${String(d.getUTCDate()).padStart(2, "0")}`;
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.summary}
+  lang={lang}
+  ogImage={ogImage}
+  article
+>
+  <ReadingProgress />
+  <Sidenotes />
+
+  <article class:list={["post-layout", { "has-toc": showToc }]}>
+    {/* ── LEFT RAIL — sticky meta marginalia ── */}
+    <aside class="post-rail" aria-label="Post metadata">
+      <div class="rail-sticky">
+        <time class="rail-date" datetime={post.data.date.toISOString()}>
+          {dateFmt}
+        </time>
+        <span class="rail-read">{stats.label}</span>
+        {
+          post.data.tags.length > 0 && (
+            <ul class="rail-tags">
+              {post.data.tags.map((t) => (
+                <li>
+                  <a href={`/${lang}/tags/${slugifyTag(t)}/`}>#{t}</a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </aside>
+
+    {/* ── MAIN COLUMN — title, summary, body ── */}
+    <div class="post-main">
+      <header class="post-header">
+        <h1 class="post-title">{post.data.title}</h1>
+        <p class="post-summary">{post.data.summary}</p>
+        <div class="post-translation">
+          <TranslationLink post={post} />
+        </div>
+      </header>
+
+      <div class="post-body prose">
+        <slot />
+      </div>
+    </div>
+
+    {/* ── RIGHT RAIL — TOC (only if showToc) ── */}
+    {
+      showToc && (
+        <aside class="post-toc">
+          <div class="toc-sticky">
+            <TableOfContents headings={headings} lang={lang} />
+          </div>
+        </aside>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .post-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    width: 100%;
+    max-width: var(--content-wide);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+    padding-block: var(--space-section);
+  }
+
+  /* Tablet+ : add left rail (≥1024px) */
+  @media (min-width: 1024px) {
+    .post-layout {
+      grid-template-columns: 8rem minmax(0, var(--content-width));
+      column-gap: var(--space-10);
+    }
+    /* When TOC present, 3-col layout */
+    .post-layout.has-toc {
+      grid-template-columns: 8rem minmax(0, var(--content-width)) 12rem;
+    }
+  }
+
+  /* ── LEFT RAIL ── */
+  .post-rail {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-muted);
+    line-height: 1.6;
+  }
+  .rail-sticky {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .rail-date { color: var(--fg-muted); letter-spacing: 0.02em; }
+  .rail-read { color: var(--fg-subtle); }
+  .rail-tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: var(--space-2);
+  }
+  .rail-tags a {
+    color: var(--fg-subtle);
+    transition: color var(--duration-fast) var(--ease);
+  }
+  .rail-tags a:hover { color: var(--accent); }
+
+  /* Sticky behaviour desktop */
+  @media (min-width: 1024px) {
+    .rail-sticky {
+      position: sticky;
+      top: var(--space-8);
+      align-self: start;
+    }
+  }
+
+  /* On mobile, rail becomes inline meta row above the title */
+  @media (max-width: 1023px) {
+    .post-rail { order: 1; }
+    .post-main { order: 2; }
+    .post-toc  { order: 3; }
+    .rail-sticky {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      align-items: baseline;
+    }
+    .rail-tags {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: 0;
+    }
+  }
+
+  /* ── MAIN ── */
+  .post-main { min-width: 0; }
+  .post-header {
+    margin-bottom: var(--space-10);
+  }
+  .post-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 1.5rem + 2.5vw, 3.25rem);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.06;
+    text-wrap: balance;
+  }
+  .post-summary {
+    margin-top: var(--space-4);
+    font-size: var(--text-lg);
+    color: var(--fg-muted);
+    line-height: 1.5;
+    max-width: 56ch;
+    text-wrap: pretty;
+  }
+  .post-translation {
+    margin-top: var(--space-6);
+  }
+
+  /* Body inherits max-width from .prose (--content-width) */
+  .post-body { max-width: 100%; }
+
+  /* ── RIGHT TOC ── */
+  .post-toc { min-width: 0; }
+  .toc-sticky {
+    position: sticky;
+    top: var(--space-8);
+    align-self: start;
+  }
+  @media (max-width: 1023px) {
+    .post-toc { display: none; }
+  }
+</style>

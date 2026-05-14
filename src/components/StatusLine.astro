@@ -1,0 +1,101 @@
+---
+import { now, site, type Locale } from "../lib/site-config";
+import { getPostsByLang } from "../lib/posts";
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+
+const posts = await getPostsByLang(lang);
+const latest = posts[0];
+
+function timeAgo(date: Date, lang: Locale): string {
+  const days = Math.max(0, Math.round((Date.now() - date.getTime()) / 86_400_000));
+  if (lang === "vi") {
+    if (days === 0) return "hôm nay";
+    if (days === 1) return "hôm qua";
+    if (days < 30) return `${days}d trước`;
+    if (days < 365) return `${Math.round(days / 30)}mo trước`;
+    return `${Math.round(days / 365)}y trước`;
+  }
+  if (days === 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days}d ago`;
+  if (days < 365) return `${Math.round(days / 30)}mo ago`;
+  return `${Math.round(days / 365)}y ago`;
+}
+
+const labels = {
+  vi: { now: "run", last: "last_note" },
+  en: { now: "run", last: "last_note" },
+};
+const t = labels[lang];
+
+const lastShipped = latest ? timeAgo(latest.data.date, lang) : null;
+---
+
+<div class="status-line" role="region" aria-label="Current status">
+  <span class="prompt">{site.author.toLowerCase()}@field-notes:~$</span>
+  <span class="cmd">{t.now}</span>
+  <span class="arrow">↳</span>
+  <span class="payload">
+    <span class="payload-key">{now.current[lang]}</span>
+    {
+      lastShipped && (
+        <>
+          <span class="dot">·</span>
+          <span class="payload-meta">
+            {t.last} {lastShipped}
+          </span>
+        </>
+      )
+    }
+    <span class="dot">·</span>
+    <span class="payload-meta">{site.location}</span>
+  </span>
+</div>
+
+<style>
+  .status-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: baseline;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1.6;
+    color: var(--fg-subtle);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: color-mix(in oklch, var(--paper) 88%, transparent);
+  }
+  .prompt { color: var(--fg-subtle); opacity: 0.7; }
+  .cmd { color: var(--accent); }
+  .arrow { color: var(--accent); opacity: 0.7; }
+  .payload {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+  .payload-key { color: var(--fg); }
+  .payload-meta { color: var(--fg-muted); }
+  .dot { opacity: 0.4; }
+
+  /* subtle blinking caret at end */
+  .status-line::after {
+    content: "▍";
+    color: var(--accent);
+    margin-left: var(--space-1);
+    animation: blink 1.2s steps(2, end) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .status-line::after { animation: none; }
+  }
+  @keyframes blink {
+    0%, 50% { opacity: 0.9; }
+    50.01%, 100% { opacity: 0; }
+  }
+</style>

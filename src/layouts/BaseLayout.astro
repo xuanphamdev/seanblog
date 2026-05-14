@@ -1,0 +1,151 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import SearchModal from "../components/SearchModal.astro";
+import BackToTop from "../components/BackToTop.astro";
+import { site, type Locale } from "../lib/site-config";
+
+interface Props {
+  title: string;
+  description?: string;
+  lang: Locale;
+  ogImage?: string;
+  noIndex?: boolean;
+  /** Add `og:type=article` and related meta */
+  article?: boolean;
+}
+
+const {
+  title,
+  description = site.description[Astro.props.lang],
+  lang,
+  ogImage,
+  noIndex = false,
+  article = false,
+} = Astro.props;
+
+const pageTitle =
+  title === site.title ? title : `${title} — ${site.title}`;
+
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const altLang: Locale = lang === "vi" ? "en" : "vi";
+
+// Swap /vi/ ↔ /en/ for alternate
+const altPath = Astro.url.pathname.replace(
+  new RegExp(`^/${lang}(/|$)`),
+  `/${altLang}$1`,
+);
+const altCanonical = new URL(altPath, site.url).href;
+
+const ogImageUrl = ogImage
+  ? new URL(ogImage, site.url).href
+  : new URL("/og-default.png", site.url).href;
+---
+
+<!doctype html>
+<html lang={lang} data-theme="dark" data-pagefind-filter={`lang:${lang}`}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="generator" content={Astro.generator} />
+
+    {/* Theme init — must run before paint to avoid FOUC.
+        Also re-applied after Astro view transitions (otherwise the new
+        document's hardcoded data-theme="dark" overwrites the user's choice). */}
+    <script is:inline>
+      (function () {
+        function applyTheme() {
+          try {
+            var stored = localStorage.getItem("theme");
+            var sys = matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+            var theme =
+              stored === "light" || stored === "dark" ? stored : sys;
+            document.documentElement.dataset.theme = theme;
+          } catch (e) {
+            /* localStorage blocked — keep markup default */
+          }
+        }
+        // Initial paint
+        applyTheme();
+        // Re-apply BEFORE swap so new document has correct theme during transition
+        document.addEventListener("astro:before-swap", function (e) {
+          try {
+            var stored = localStorage.getItem("theme");
+            var sys = matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+            var theme =
+              stored === "light" || stored === "dark" ? stored : sys;
+            if (e.newDocument && e.newDocument.documentElement) {
+              e.newDocument.documentElement.dataset.theme = theme;
+            }
+          } catch (err) {}
+        });
+        // Re-apply AFTER swap as a belt-and-suspenders fallback
+        document.addEventListener("astro:after-swap", applyTheme);
+      })();
+    </script>
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {noIndex && <meta name="robots" content="noindex,nofollow" />}
+
+    {/* Canonical + alternates */}
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={lang} href={canonical} />
+    <link rel="alternate" hreflang={altLang} href={altCanonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+
+    {/* OG / Twitter */}
+    <meta property="og:type" content={article ? "article" : "website"} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.title} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:locale" content={lang === "vi" ? "vi_VN" : "en_US"} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    {/* RSS feeds */}
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.title} — VI`}
+      href="/rss-vi.xml"
+    />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.title} — EN`}
+      href="/rss-en.xml"
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <ClientRouter />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      {lang === "vi" ? "Đến nội dung chính" : "Skip to main content"}
+    </a>
+
+    <Header lang={lang} transition:persist="header" transition:name="header" />
+
+    <main id="main" transition:animate="fade">
+      <slot />
+    </main>
+
+    <Footer lang={lang} transition:persist="footer" transition:name="footer" />
+
+    <SearchModal lang={lang} transition:persist="search-modal" />
+    <BackToTop lang={lang} />
+  </body>
+</html>

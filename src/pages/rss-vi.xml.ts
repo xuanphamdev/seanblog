@@ -1,0 +1,25 @@
+import rss from "@astrojs/rss";
+import type { APIContext } from "astro";
+import { getPostsByLang, postUrl } from "../lib/posts";
+import { site } from "../lib/site-config";
+
+const LANG = "vi" as const;
+const MAX_ITEMS = 30;
+
+export async function GET(context: APIContext) {
+  const posts = await getPostsByLang(LANG);
+  return rss({
+    title: `${site.title} — VI`,
+    description: site.description[LANG],
+    site: context.site ?? site.url,
+    items: posts.slice(0, MAX_ITEMS).map((p) => ({
+      title: p.data.title,
+      pubDate: p.data.date,
+      description: p.data.summary,
+      link: postUrl(p),
+      categories: p.data.tags,
+    })),
+    customData: `<language>vi-VN</language>`,
+    stylesheet: false,
+  });
+}

@@ -1,0 +1,179 @@
+---
+import { ui, type Locale } from "../lib/site-config";
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+---
+
+<div
+  id="search-modal"
+  data-search-modal
+  class="search-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="search-modal-label"
+  hidden
+>
+  <div class="search-backdrop" data-search-close></div>
+  <div class="search-dialog" role="search">
+    <header class="search-head">
+      <span id="search-modal-label" class="search-prompt" aria-hidden="true">/</span>
+      <input
+        type="search"
+        id="search-input"
+        class="search-input"
+        placeholder={ui.search.placeholder[lang]}
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <kbd class="search-esc">esc</kbd>
+    </header>
+    <div class="search-results" id="search-results" aria-live="polite"></div>
+    <footer class="search-foot">
+      <span class="hint">
+        <kbd>↑</kbd><kbd>↓</kbd> {lang === "vi" ? "di chuyển" : "navigate"}
+      </span>
+      <span class="hint">
+        <kbd>↵</kbd> {lang === "vi" ? "mở" : "open"}
+      </span>
+      <span class="hint">
+        <kbd>esc</kbd> {lang === "vi" ? "đóng" : "close"}
+      </span>
+    </footer>
+  </div>
+</div>
+
+<style>
+  .search-modal[hidden] { display: none; }
+  .search-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: clamp(4rem, 10vh, 8rem);
+    padding-inline: var(--gutter);
+  }
+  .search-backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklch, var(--bg) 70%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .search-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 40px -8px oklch(0% 0 0 / 0.4);
+    overflow: hidden;
+  }
+  .search-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .search-prompt {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    opacity: 0.7;
+    font-size: var(--text-base);
+  }
+  .search-input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    color: var(--fg);
+  }
+  .search-input::placeholder { color: var(--fg-subtle); }
+  .search-esc {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    padding: 2px var(--space-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 3px;
+    color: var(--fg-subtle);
+  }
+  .search-results {
+    max-height: 50vh;
+    overflow-y: auto;
+    padding: var(--space-2);
+  }
+  .search-results:empty { display: none; }
+
+  .search-foot {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px solid var(--border-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+  }
+  .search-foot kbd {
+    font-family: var(--font-mono);
+    padding: 0 var(--space-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 3px;
+    color: var(--fg-muted);
+    margin-right: 4px;
+  }
+  .hint { display: inline-flex; align-items: center; gap: 2px; }
+
+  /* Result item styling (rendered by search.ts) */
+  :global(.search-result) {
+    display: block;
+    padding: var(--space-3) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: inherit;
+    transition: background var(--duration-fast) var(--ease);
+  }
+  :global(.search-result.is-active),
+  :global(.search-result:hover) {
+    background: var(--accent-soft);
+  }
+  :global(.search-result-title) {
+    font-family: var(--font-serif);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--fg);
+  }
+  :global(.search-result-meta) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+    margin-top: 2px;
+  }
+  :global(.search-result-snippet) {
+    margin-top: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+  :global(.search-result-snippet mark) {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  :global(.search-empty) {
+    padding: var(--space-4);
+    color: var(--fg-muted);
+    font-style: italic;
+    text-align: center;
+  }
+</style>
+
+<script>
+  import "../scripts/search-modal-controller.js";
+</script>

@@ -1,0 +1,187 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import StatusLine from "../../components/StatusLine.astro";
+import TagCloud from "../../components/TagCloud.astro";
+import { readingTime } from "../../lib/reading-time";
+import { getPostsByLang, postUrl } from "../../lib/posts";
+import { getAllTags } from "../../lib/tags";
+import { site, hero, LOCALES, type Locale } from "../../lib/site-config";
+
+export async function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const posts = await getPostsByLang(lang);
+const tags = await getAllTags(lang);
+const featured = posts[0];
+const archive = featured ? posts.slice(1) : posts;
+const h = hero[lang];
+const tagHref = (needle: string) => {
+  const slug = tags.find((tag) => tag.raw.toLowerCase().includes(needle))?.slug;
+  return slug ? `/${lang}/tags/${slug}/` : `/${lang}/tags/`;
+};
+const topicLanes = [
+  { key: "agents", vi: "AI agents", en: "AI agents", href: tagHref("agents") },
+  { key: "systems", vi: "system notes", en: "system notes", href: `/${lang}/tags/` },
+  { key: "field", vi: "field notes", en: "field notes", href: tagHref("notes") },
+];
+
+const labels = {
+  vi: {
+    eyebrow: "terminal field notes",
+    latest: "bài mới nhất",
+    read: "đọc bài này",
+    tags: "duyệt thẻ",
+    topics: "topic lanes",
+    archive: "sổ ghi chép",
+    empty: "Chưa có bài viết.",
+  },
+  en: {
+    eyebrow: "terminal field notes",
+    latest: "latest note",
+    read: "read this note",
+    tags: "browse tags",
+    topics: "topic lanes",
+    archive: "notebook",
+    empty: "No posts yet.",
+  },
+};
+const t = labels[lang];
+const featuredRead = featured ? readingTime(featured.body ?? "", lang).label : "";
+const featuredDate = featured
+  ? `${featured.data.date.getUTCFullYear()}·${String(featured.data.date.getUTCMonth() + 1).padStart(2, "0")}·${String(featured.data.date.getUTCDate()).padStart(2, "0")}`
+  : "";
+---
+
+<BaseLayout title={site.title} lang={lang}>
+  <div class="home-shell canvas">
+    <StatusLine lang={lang} />
+
+    <section class="home-hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span>~/sean</span><span>{t.eyebrow}</span></p>
+        <h1 id="hero-title" class="hero-title">
+          <span>{h.titleA}</span>
+          <em>{h.titleB}</em>
+        </h1>
+        <p class="hero-lede">{h.lede}</p>
+        <div class="hero-actions" aria-label="Homepage actions">
+          {featured && <a class="action-primary" href={postUrl(featured)}>{t.read}<span aria-hidden="true">→</span></a>}
+          <a class="action-secondary" href={`/${lang}/tags/`}>{t.tags}</a>
+        </div>
+      </div>
+
+      {
+        featured && (
+          <aside class="latest-note" aria-labelledby="latest-note-title">
+            <div class="note-chrome" aria-hidden="true">
+              <span></span><span></span><span></span>
+              <b>latest.md</b>
+            </div>
+            <p class="section-kicker">{t.latest}</p>
+            <a class="latest-link" href={postUrl(featured)}>
+              <h2 id="latest-note-title">{featured.data.title}</h2>
+              <p>{featured.data.summary}</p>
+              <span>{featuredDate} / {featuredRead}</span>
+            </a>
+            <div class="latest-tags" aria-label="Latest post tags">
+              {featured.data.tags.slice(0, 4).map((tag) => <span>#{tag}</span>)}
+            </div>
+          </aside>
+        )
+      }
+    </section>
+
+    <section class="topic-lanes" aria-labelledby="topics-heading">
+      <p id="topics-heading" class="section-kicker">{t.topics}</p>
+      <div class="lane-list">
+        {topicLanes.map((topic, index) => (
+          <a href={topic.href} class="topic-lane">
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{topic[lang]}</strong>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="posts-section" aria-labelledby="recent-heading">
+      <header class="section-header">
+        <p class="section-kicker">archive</p>
+        <h2 id="recent-heading">{t.archive}</h2>
+      </header>
+      {
+        archive.length === 0 ? (
+          <p class="empty">{t.empty}</p>
+        ) : (
+          <div class="post-stream">
+            {archive.map((post, i) => <PostCard post={post} index={i + 2} />)}
+          </div>
+        )
+      }
+    </section>
+
+    {
+      tags.length > 0 && (
+        <section class="tags-section" aria-labelledby="tags-heading">
+          <header class="section-header">
+            <p class="section-kicker">index</p>
+            <h2 id="tags-heading">{t.tags}</h2>
+          </header>
+          <TagCloud tags={tags} lang={lang} />
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .home-shell { padding-block: var(--space-6) var(--space-section); }
+  .home-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(19rem, 0.5fr); gap: clamp(var(--space-8), 6vw, var(--space-16)); align-items: center; min-height: min(76vh, 680px); padding-block: var(--space-12); }
+  .hero-copy { min-width: 0; }
+  .eyebrow { display: flex; flex-wrap: wrap; gap: var(--space-3); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-subtle); text-transform: lowercase; letter-spacing: 0.08em; padding-bottom: var(--space-6); }
+  .eyebrow span:first-child { color: var(--accent); }
+  .hero-title { max-width: 11ch; font-family: var(--font-serif); font-size: clamp(3.25rem, 1.85rem + 7vw, 7.8rem); font-weight: 600; line-height: 0.9; letter-spacing: -0.035em; color: var(--fg); }
+  .hero-title span, .hero-title em { display: block; }
+  .hero-title em { color: var(--accent); font-style: italic; font-weight: 500; }
+  .hero-lede { margin-top: var(--space-6); max-width: 58ch; color: var(--fg-muted); font-size: var(--text-lg); line-height: 1.55; text-wrap: pretty; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
+  .action-primary, .action-secondary { min-height: 44px; display: inline-flex; align-items: center; gap: var(--space-2); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: var(--text-xs); transition: color var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease), background var(--duration-fast) var(--ease); }
+  .action-primary { padding: 0 var(--space-4); color: var(--accent-fg); background: var(--accent); }
+  .action-secondary { padding: 0 var(--space-4); color: var(--fg-muted); border: 1px solid var(--border); }
+  .action-primary:hover { background: var(--link-hover); }
+  .action-secondary:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  .latest-note { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); padding: var(--space-5); box-shadow: 0 24px 70px oklch(0% 0 0 / 0.22); }
+  .note-chrome { display: flex; align-items: center; gap: var(--space-2); margin: calc(var(--space-5) * -1) calc(var(--space-5) * -1) var(--space-5); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-subtle); }
+  .note-chrome span { width: 8px; height: 8px; border-radius: 999px; background: var(--border); }
+  .note-chrome span:first-child { background: var(--accent); }
+  .note-chrome b { margin-left: auto; font-weight: 400; }
+  .section-kicker { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; }
+  .latest-link h2 { margin-top: var(--space-5); font-size: clamp(1.8rem, 1.25rem + 2vw, 3rem); line-height: 1; letter-spacing: -0.03em; transition: color var(--duration-fast) var(--ease); }
+  .latest-link p { margin-top: var(--space-4); color: var(--fg-muted); line-height: 1.55; }
+  .latest-link span { display: inline-block; margin-top: var(--space-5); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-subtle); }
+  .latest-link:hover h2 { color: var(--accent); }
+  .latest-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-6); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-muted); }
+
+  .topic-lanes, .posts-section, .tags-section { border-top: 1px solid var(--border-subtle); padding-block: var(--space-10); }
+  .lane-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
+  .topic-lane { min-height: 5.5rem; display: flex; flex-direction: column; justify-content: space-between; padding: var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); transition: color var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease), background var(--duration-fast) var(--ease); }
+  .topic-lane span { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-subtle); }
+  .topic-lane strong { font-family: var(--font-serif); font-size: var(--text-xl); font-weight: 600; line-height: 1.05; }
+  .topic-lane:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .section-header { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-6); margin-bottom: var(--space-4); }
+  .section-header h2 { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-muted); text-transform: lowercase; letter-spacing: 0.08em; }
+  .empty { color: var(--fg-muted); font-style: italic; padding-block: var(--space-6); }
+
+  @media (max-width: 900px) {
+    .home-hero { grid-template-columns: 1fr; min-height: auto; padding-block: var(--space-10); }
+    .lane-list { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .home-shell { padding-block-start: var(--space-4); }
+    .hero-title { font-size: clamp(3rem, 16vw, 5rem); max-width: 9ch; }
+    .action-primary, .action-secondary { width: 100%; justify-content: center; }
+  }
+</style>

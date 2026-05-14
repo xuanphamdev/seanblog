@@ -1,0 +1,120 @@
+---
+import type { Locale } from "../lib/site-config";
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const labels = {
+  vi: { toggle: "Đổi chế độ sáng/tối" },
+  en: { toggle: "Toggle light/dark theme" },
+};
+---
+
+<button
+  id="theme-toggle"
+  data-theme-toggle
+  type="button"
+  class="theme-toggle"
+  aria-label={labels[lang].toggle}
+  title={labels[lang].toggle}
+>
+  <svg
+    class="icon-sun"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+  </svg>
+  <svg
+    class="icon-moon"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    color: var(--fg-muted);
+    transition:
+      color var(--duration-fast) var(--ease),
+      background var(--duration-fast) var(--ease);
+  }
+  .theme-toggle:hover {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  /* Show sun in light mode (suggesting switch to dark? we show current) */
+  /* We show the icon for the CURRENT theme */
+  :global([data-theme="dark"]) .icon-sun { display: none; }
+  :global([data-theme="light"]) .icon-moon { display: none; }
+</style>
+
+<script is:inline>
+  (() => {
+    const getStoredTheme = () => {
+      try {
+        const stored = localStorage.getItem("theme");
+        return stored === "light" || stored === "dark" ? stored : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const getSystemTheme = () =>
+      matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+    const applyTheme = (theme) => {
+      document.documentElement.dataset.theme = theme;
+    };
+
+    const syncTheme = () => {
+      applyTheme(getStoredTheme() || getSystemTheme());
+    };
+
+    if (!window.__seandevThemeToggleReady) {
+      document.addEventListener("click", (event) => {
+        if (!(event.target instanceof Element)) return;
+        const button = event.target.closest("[data-theme-toggle]");
+        if (!button) return;
+
+        const current = document.documentElement.dataset.theme || getSystemTheme();
+        const next = current === "dark" ? "light" : "dark";
+        applyTheme(next);
+        try {
+          localStorage.setItem("theme", next);
+        } catch {}
+      });
+
+      document.addEventListener("astro:page-load", syncTheme);
+      window.addEventListener("storage", (event) => {
+        if (event.key === "theme") syncTheme();
+      });
+      window.__seandevThemeToggleReady = true;
+    }
+
+    syncTheme();
+  })();
+</script>

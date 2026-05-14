@@ -1,0 +1,63 @@
+---
+import { readingTime } from "../lib/reading-time";
+import type { Post } from "../lib/posts";
+import { getPostLocale } from "../lib/posts";
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const lang = getPostLocale(post);
+const { label: readLabel } = readingTime(post.body ?? "", lang);
+const dateFmt = post.data.date.toISOString().slice(0, 10);
+---
+
+<div class="post-meta">
+  <time class="meta-date" datetime={post.data.date.toISOString()}>
+    {dateFmt}
+  </time>
+  <span class="meta-dot">·</span>
+  <span class="meta-read">{readLabel}</span>
+  {
+    post.data.tags.length > 0 && (
+      <>
+        <span class="meta-dot">·</span>
+        <div class="meta-tags">
+          {post.data.tags.map((t) => (
+            <a
+              href={`/${lang}/tags/${t.toLowerCase()}/`}
+              class="meta-tag"
+            >
+              #{t}
+            </a>
+          ))}
+        </div>
+      </>
+    )
+  }
+</div>
+
+<style>
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+  }
+  .meta-date { color: var(--fg-muted); }
+  .meta-read { color: var(--fg-muted); }
+  .meta-dot { opacity: 0.5; }
+  .meta-tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .meta-tag {
+    color: var(--fg-subtle);
+    transition: color var(--duration-fast) var(--ease);
+  }
+  .meta-tag:hover { color: var(--accent); }
+</style>

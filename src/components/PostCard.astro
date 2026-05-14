@@ -1,0 +1,200 @@
+---
+import { readingTime } from "../lib/reading-time";
+import { getPostLocale, postUrl, type Post } from "../lib/posts";
+
+interface Props {
+  post: Post;
+  index: number; // 1-based serial
+}
+const { post, index } = Astro.props;
+const lang = getPostLocale(post);
+const url = postUrl(post);
+const { label: readLabel } = readingTime(post.body ?? "", lang);
+
+const d = post.data.date;
+const dateFmt = `${d.getUTCFullYear()}·${String(d.getUTCMonth() + 1).padStart(2, "0")}·${String(d.getUTCDate()).padStart(2, "0")}`;
+
+const serial = String(index).padStart(3, "0");
+const tags = post.data.tags;
+const labels = {
+  vi: { open: "mở ghi chú" },
+  en: { open: "open note" },
+};
+const t = labels[lang];
+---
+
+<article class="post-row">
+  <a href={url} class="post-link layout-magazine" aria-labelledby={`post-${serial}-title`}>
+    <aside class="marginalia-l post-aside" aria-hidden="true">
+      <span class="post-serial">{serial}</span>
+      <time class="post-date" datetime={post.data.date.toISOString()}>
+        {dateFmt}
+      </time>
+      <span class="post-read">{readLabel}</span>
+    </aside>
+
+    <div class="body-r post-body">
+      <h2 id={`post-${serial}-title`} class="post-title">
+        {post.data.title}
+      </h2>
+      <p class="post-summary">{post.data.summary}</p>
+      {
+        tags.length > 0 && (
+          <div class="post-tags">
+            {tags.slice(0, 5).map((t, i) => (
+              <>
+                {i > 0 && <span class="tag-sep">·</span>}
+                <span class="post-tag">{t}</span>
+              </>
+            ))}
+          </div>
+        )
+      }
+      <span class="post-action" aria-hidden="true">
+        <span>{t.open}</span>
+        <span>→</span>
+      </span>
+    </div>
+  </a>
+</article>
+
+<style>
+  .post-row {
+    padding-block: var(--space-8);
+    position: relative;
+  }
+  .post-row + .post-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--border-subtle) 8%,
+      var(--border-subtle) 92%,
+      transparent
+    );
+    opacity: 0.6;
+  }
+
+  .post-link {
+    color: inherit;
+    display: block;
+    border-radius: var(--radius-sm);
+  }
+
+  .post-aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+    line-height: 1.4;
+    padding-top: 0.6em;
+    text-align: right;
+  }
+  .post-serial {
+    font-size: 0.95em;
+    color: var(--fg-subtle);
+    opacity: 0.55;
+    letter-spacing: 0.04em;
+    transition: opacity var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+  }
+  .post-link:hover .post-serial {
+    opacity: 1;
+    color: var(--accent);
+  }
+  .post-link:focus-visible .post-serial {
+    opacity: 1;
+    color: var(--accent);
+  }
+  .post-date { color: var(--fg-muted); }
+  .post-read { color: var(--fg-subtle); }
+
+  .post-body {
+    min-width: 0;
+  }
+
+  .post-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.625rem, 1.3rem + 1.5vw, 2.375rem);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
+    color: var(--fg);
+    text-wrap: balance;
+    transition: color var(--duration-fast) var(--ease);
+  }
+  .post-link:hover .post-title,
+  .post-link:focus-visible .post-title {
+    color: var(--accent);
+  }
+
+  .post-summary {
+    margin-top: var(--space-3);
+    color: var(--fg-muted);
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  .post-tags {
+    margin-top: var(--space-4);
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--fg-subtle);
+  }
+  .post-tag {
+    color: var(--fg-subtle);
+    white-space: nowrap;
+  }
+  .post-tag::before {
+    content: "#";
+    color: var(--accent);
+    opacity: 0.6;
+  }
+  .tag-sep { opacity: 0.4; }
+  .post-link:hover .post-tag { color: var(--fg-muted); }
+
+  .post-action {
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin-top: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--accent);
+    opacity: 0.7;
+    transform: translateX(0);
+    transition: opacity var(--duration-normal) var(--ease), transform var(--duration-normal) var(--ease);
+  }
+  .post-link:hover .post-action,
+  .post-link:focus-visible .post-action {
+    opacity: 1;
+    transform: translateX(var(--space-1));
+  }
+
+  /* On narrow screens, marginalia becomes inline meta row */
+  @media (max-width: 720px) {
+    .post-aside {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      text-align: left;
+      padding-top: 0;
+      margin-bottom: var(--space-2);
+    }
+    .post-serial { display: none; }
+    .post-aside::before {
+      content: "·";
+      order: 1;
+      opacity: 0.4;
+    }
+  }
+</style>
