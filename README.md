@@ -47,6 +47,24 @@ npm run check      # astro check (TypeScript)
 
 To link a VI post to its EN translation (or vice versa), set the **same** `translationKey` on both. The TranslationLink in the post header will auto-link them.
 
+## Publish from OpenClaw / Telegram bot
+
+The bot can publish with one command after it drafts the article body:
+
+```bash
+cd /app/workspace/seanblog
+node scripts/publish-post.mjs \
+  --lang vi \
+  --title "Post title" \
+  --summary "One paragraph hook for previews + OG." \
+  --tags "ai,agents,engineering" \
+  --body-file /tmp/seanblog-post-body.md
+```
+
+The script pulls latest `main`, writes the post, runs `npm run check` and
+`npm run build`, commits, pushes, then prints the public URL. The GoClaw skill
+prompt lives at `openclaw/skills/seanblog-publisher/SKILL.md`.
+
 ## Project structure
 
 ```
