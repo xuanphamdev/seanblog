@@ -5,6 +5,8 @@
 export const LOCALES = ["vi", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "vi";
+const siteUrl =
+  import.meta.env.PUBLIC_SITE_URL ?? "https://xuanphamdev.github.io/seanblog";
 
 export const site = {
   title: "Seandev",
@@ -17,8 +19,8 @@ export const site = {
     en: "Personal blog on Rust, AI agents, system design and distributed systems.",
   },
   author: "Sean",
-  url: "https://seandev.example",
-  github: "https://github.com/seandev",
+  url: siteUrl,
+  github: "https://github.com/xuanphamdev/seanblog",
   location: "saigon, vn",
   defaultLocale: DEFAULT_LOCALE,
   locales: LOCALES,

@@ -6,6 +6,7 @@ import TagCloud from "../../components/TagCloud.astro";
 import { readingTime } from "../../lib/reading-time";
 import { getPostsByLang, postUrl } from "../../lib/posts";
 import { getAllTags } from "../../lib/tags";
+import { withBase } from "../../lib/paths";
 import { site, hero, LOCALES, type Locale } from "../../lib/site-config";
 
 export async function getStaticPaths() {
@@ -20,11 +21,11 @@ const archive = featured ? posts.slice(1) : posts;
 const h = hero[lang];
 const tagHref = (needle: string) => {
   const slug = tags.find((tag) => tag.raw.toLowerCase().includes(needle))?.slug;
-  return slug ? `/${lang}/tags/${slug}/` : `/${lang}/tags/`;
+  return withBase(slug ? `/${lang}/tags/${slug}/` : `/${lang}/tags/`);
 };
 const topicLanes = [
   { key: "agents", vi: "AI agents", en: "AI agents", href: tagHref("agents") },
-  { key: "systems", vi: "system notes", en: "system notes", href: `/${lang}/tags/` },
+  { key: "systems", vi: "system notes", en: "system notes", href: withBase(`/${lang}/tags/`) },
   { key: "field", vi: "field notes", en: "field notes", href: tagHref("notes") },
 ];
 
@@ -69,7 +70,7 @@ const featuredDate = featured
         <p class="hero-lede">{h.lede}</p>
         <div class="hero-actions" aria-label="Homepage actions">
           {featured && <a class="action-primary" href={postUrl(featured)}>{t.read}<span aria-hidden="true">→</span></a>}
-          <a class="action-secondary" href={`/${lang}/tags/`}>{t.tags}</a>
+          <a class="action-secondary" href={withBase(`/${lang}/tags/`)}>{t.tags}</a>
         </div>
       </div>
 

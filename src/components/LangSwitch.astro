@@ -1,16 +1,17 @@
 ---
 import { LOCALES, type Locale } from "../lib/site-config";
+import { withBase, withoutBase } from "../lib/paths";
 
 interface Props {
   lang: Locale;
 }
 const { lang } = Astro.props;
 
-const path = Astro.url.pathname;
+const path = withoutBase(Astro.url.pathname);
 
 function swapPath(p: string, to: Locale): string {
   // Replace /vi/... or /en/... with /to/...
-  return p.replace(/^\/(vi|en)(\/|$)/, `/${to}$2`);
+  return withBase(p.replace(/^\/(vi|en)(\/|$)/, `/${to}$2`));
 }
 ---
 

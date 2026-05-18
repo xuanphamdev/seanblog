@@ -7,6 +7,7 @@ import ReadingProgress from "../components/ReadingProgress.astro";
 import Sidenotes from "../components/Sidenotes.astro";
 import { readingTime } from "../lib/reading-time";
 import { getPostLocale, getPostSlug, type Post } from "../lib/posts";
+import { withBase } from "../lib/paths";
 import { slugifyTag } from "../lib/tags";
 
 interface Props {
@@ -50,7 +51,7 @@ const dateFmt = `${d.getUTCFullYear()}·${String(d.getUTCMonth() + 1).padStart(2
             <ul class="rail-tags">
               {post.data.tags.map((t) => (
                 <li>
-                  <a href={`/${lang}/tags/${slugifyTag(t)}/`}>#{t}</a>
+                  <a href={withBase(`/${lang}/tags/${slugifyTag(t)}/`)}>#{t}</a>
                 </li>
               ))}
             </ul>

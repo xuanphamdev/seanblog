@@ -1,5 +1,6 @@
 ---
 import { site, ui, type Locale } from "../lib/site-config";
+import { withBase } from "../lib/paths";
 import LangSwitch from "./LangSwitch.astro";
 import ThemeToggle from "./ThemeToggle.astro";
 
@@ -9,15 +10,15 @@ interface Props {
 const { lang } = Astro.props;
 
 const navItems = [
-  { href: `/${lang}/`, label: ui.nav.posts[lang] },
-  { href: `/${lang}/tags/`, label: ui.nav.tags[lang] },
-  { href: `/${lang}/about/`, label: ui.nav.about[lang] },
+  { href: withBase(`/${lang}/`), label: ui.nav.posts[lang] },
+  { href: withBase(`/${lang}/tags/`), label: ui.nav.tags[lang] },
+  { href: withBase(`/${lang}/about/`), label: ui.nav.about[lang] },
 ];
 ---
 
 <header class="site-header">
   <div class="header-inner canvas">
-    <a href={`/${lang}/`} class="brand" aria-label={site.title}>
+    <a href={withBase(`/${lang}/`)} class="brand" aria-label={site.title}>
       <span class="brand-name">{site.title.toLowerCase()}</span><span
         class="brand-dot">.</span
       >

@@ -12,7 +12,7 @@ Use this skill when the owner asks for a new blog post or article.
 - Repository: `git@github.com:xuanphamdev/seanblog.git`
 - Runtime repo path: `/app/workspace/seanblog`
 - Post path: `src/content/posts/{vi|en}/YYYY-MM-DD-slug.md`
-- Public URL: `https://seandev.io/{vi|en}/posts/{slug}/`
+- Public URL: `https://xuanphamdev.github.io/seanblog/{vi|en}/posts/{slug}/`
 
 ## Required Format
 
@@ -64,8 +64,8 @@ On success, reply:
 ```text
 Đã publish bài "{title}".
 File: src/content/posts/{lang}/{date}-{slug}.md
-URL: https://seandev.io/{lang}/posts/{slug}/
-Deploy Cloudflare Pages sẽ tự chạy sau khi GitHub nhận push.
+URL: https://xuanphamdev.github.io/seanblog/{lang}/posts/{slug}/
+GitHub Pages sẽ tự build/deploy sau khi GitHub nhận push.
 ```
 
 On failure, include the failed step and the exact error summary. Do not expose secrets, SSH keys, tokens, `.env` content, or server passwords.

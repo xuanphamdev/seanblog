@@ -1,5 +1,4 @@
 ---
-// Root fallback. Cloudflare `_redirects` handles `/` → `/vi/` on production.
-// In dev (where _redirects isn't applied), this meta-refresh fallback covers it.
-return Astro.redirect("/vi/", 302);
+// Root fallback for both root-domain and GitHub Pages project-path deploys.
+return Astro.redirect(`${import.meta.env.BASE_URL.replace(/\/$/, "")}/vi/`, 302);
 ---

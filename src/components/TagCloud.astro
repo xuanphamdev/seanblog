@@ -1,6 +1,7 @@
 ---
 import type { TagInfo } from "../lib/tags";
 import type { Locale } from "../lib/site-config";
+import { withBase } from "../lib/paths";
 
 interface Props {
   tags: TagInfo[];
@@ -19,7 +20,7 @@ const t = labels[lang];
   {
     tags.map((tag) => (
       <a
-        href={`/${lang}/tags/${tag.slug}/`}
+        href={withBase(`/${lang}/tags/${tag.slug}/`)}
         class="tag-link"
         title={`${tag.count} ${labels[lang].posts}`}
       >

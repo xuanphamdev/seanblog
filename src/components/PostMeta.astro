@@ -2,6 +2,7 @@
 import { readingTime } from "../lib/reading-time";
 import type { Post } from "../lib/posts";
 import { getPostLocale } from "../lib/posts";
+import { withBase } from "../lib/paths";
 
 interface Props {
   post: Post;
@@ -25,7 +26,7 @@ const dateFmt = post.data.date.toISOString().slice(0, 10);
         <div class="meta-tags">
           {post.data.tags.map((t) => (
             <a
-              href={`/${lang}/tags/${t.toLowerCase()}/`}
+              href={withBase(`/${lang}/tags/${t.toLowerCase()}/`)}
               class="meta-tag"
             >
               #{t}

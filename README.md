@@ -1,6 +1,6 @@
 # Seandev
 
-Personal tech blog — bilingual (VI + EN), markdown-first. Built with Astro 5, designed Editorial Terminal style, deployed to Cloudflare Pages.
+Personal tech blog — bilingual (VI + EN), markdown-first. Built with Astro 5, designed Editorial Terminal style, deployed to GitHub Pages.
 
 ## Stack
 
@@ -13,7 +13,7 @@ Personal tech blog — bilingual (VI + EN), markdown-first. Built with Astro 5, 
 | OG images | [Satori](https://github.com/vercel/satori) + resvg, per-post auto-gen |
 | RSS | `@astrojs/rss`, separate feeds per locale |
 | i18n | Astro native (`/vi/`, `/en/`) |
-| Hosting | Cloudflare Pages |
+| Hosting | GitHub Pages |
 | Fonts | Self-hosted Fraunces, Inter, JetBrains Mono via `@fontsource` |
 
 ## Development
@@ -62,8 +62,9 @@ node scripts/publish-post.mjs \
 ```
 
 The script pulls latest `main`, writes the post, runs `npm run check` and
-`npm run build`, commits, pushes, then prints the public URL. The GoClaw skill
-prompt lives at `openclaw/skills/seanblog-publisher/SKILL.md`.
+`npm run build` with the GitHub Pages base path, commits, pushes, then prints
+the public URL. The GoClaw skill prompt lives at
+`openclaw/skills/seanblog-publisher/SKILL.md`.
 
 ## Project structure
 
@@ -110,23 +111,22 @@ src/
     └── global.css               # reset + grain overlay + magazine grid
 ```
 
-## Cloudflare Pages deploy
+## GitHub Pages deploy
 
 **One-time setup:**
 
 1. Push this repo to GitHub.
-2. In Cloudflare dashboard → **Pages** → **Create project** → connect to repo.
-3. Build settings:
-   | Setting | Value |
-   |---|---|
-   | Build command | `npm run build` |
-   | Build output directory | `dist` |
-   | Root directory | `/` |
-   | Node version (env var `NODE_VERSION`) | `20` |
-4. Save & deploy. First build ~60–90s.
-5. Custom domain (optional): Pages dashboard → **Custom domains** → add your domain. DNS auto-configured.
+2. In GitHub → repo **Settings** → **Pages** → **Build and deployment**.
+3. Set **Source** to **GitHub Actions**.
+4. Push to `main`. `.github/workflows/deploy-pages.yml` builds and deploys.
 
-**Subsequent deploys:** every `git push` to `main` auto-deploys. Preview deploys for PRs are free.
+Production URL:
+
+```text
+https://xuanphamdev.github.io/seanblog/
+```
+
+**Subsequent deploys:** every `git push` to `main` auto-deploys.
 
 **Workflow:**
 
@@ -136,7 +136,7 @@ $EDITOR src/content/posts/vi/2026-05-15-new-thing.md
 git add src/content/posts/vi/2026-05-15-new-thing.md
 git commit -m "post: new thing"
 git push
-# wait ~60s → live
+# wait for GitHub Actions → live
 ```
 
 ## Customizing "now" status

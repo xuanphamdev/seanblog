@@ -2,6 +2,7 @@
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import PostCard from "../../../components/PostCard.astro";
 import { getAllTags, getPostsByTag } from "../../../lib/tags";
+import { withBase } from "../../../lib/paths";
 import { LOCALES, type Locale } from "../../../lib/site-config";
 
 export async function getStaticPaths() {
@@ -31,7 +32,7 @@ const t = labels[lang];
   <div class="canvas page">
     <header class="page-head layout-magazine">
       <aside class="marginalia-l page-aside" aria-hidden="true">
-        <a href={`/${lang}/tags/`} class="kicker">/{lang}/tags</a>
+        <a href={withBase(`/${lang}/tags/`)} class="kicker">/{lang}/tags</a>
       </aside>
       <div class="body-r" style="max-width: none">
         <h1 class="title">

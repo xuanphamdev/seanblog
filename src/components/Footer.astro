@@ -1,5 +1,6 @@
 ---
 import { site, ui, type Locale } from "../lib/site-config";
+import { withBase } from "../lib/paths";
 
 interface Props {
   lang: Locale;
@@ -13,7 +14,7 @@ const year = new Date().getFullYear();
   <div class="footer-inner canvas">
     <p class="footer-copy">
       © {year} {site.author} ·
-      <a href={`/rss-${lang}.xml`} class="footer-link">{ui.footer.rss[lang]}</a>
+      <a href={withBase(`/rss-${lang}.xml`)} class="footer-link">{ui.footer.rss[lang]}</a>
       ·
       <a href={site.github} target="_blank" rel="noopener" class="footer-link">
         {ui.footer.github[lang]}

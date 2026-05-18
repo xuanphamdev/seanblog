@@ -7,9 +7,15 @@ import expressiveCode from "astro-expressive-code";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
+const siteUrl = process.env.SITE_URL ?? "https://xuanphamdev.github.io";
+const siteBase =
+  process.env.SITE_BASE ??
+  (process.env.DEPLOY_TARGET === "github-pages" ? "/seanblog" : undefined);
+
 // https://astro.build/config
 export default defineConfig({
-  site: "https://seandev.example",
+  site: siteUrl,
+  ...(siteBase ? { base: siteBase } : {}),
   trailingSlash: "always",
   prefetch: {
     defaultStrategy: "viewport",

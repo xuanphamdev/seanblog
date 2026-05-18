@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import process from "node:process";
 
-const DEFAULT_SITE_URL = "https://seandev.io";
+const DEFAULT_SITE_URL = "https://xuanphamdev.github.io/seanblog";
 const VALID_LANGS = new Set(["vi", "en"]);
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -62,8 +62,12 @@ const slugify = (input) =>
 const yamlString = (value) =>
   `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
-const run = (command, args, cwd) =>
-  execFileSync(command, args, { cwd, stdio: "inherit" });
+const run = (command, args, cwd, env = {}) =>
+  execFileSync(command, args, {
+    cwd,
+    env: { ...process.env, ...env },
+    stdio: "inherit",
+  });
 
 function readGitConfig(key, repoDir) {
   try {
@@ -151,6 +155,18 @@ function ensureGitIdentity(repoDir) {
   }
 }
 
+function buildDeployEnv(siteUrl) {
+  const url = new URL(siteUrl);
+  const base = url.pathname.replace(/\/$/, "");
+
+  return {
+    DEPLOY_TARGET: "github-pages",
+    PUBLIC_SITE_URL: `${url.origin}${base}`,
+    SITE_BASE: base,
+    SITE_URL: url.origin,
+  };
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const repoDir = resolve(args.repoDir);
@@ -167,8 +183,9 @@ function main() {
   mkdirSync(dirname(post.filePath), { recursive: true });
   writeFileSync(post.filePath, post.markdown, "utf8");
 
-  run("npm", ["run", "check"], repoDir);
-  run("npm", ["run", "build"], repoDir);
+  const deployEnv = buildDeployEnv(args.siteUrl);
+  run("npm", ["run", "check"], repoDir, deployEnv);
+  run("npm", ["run", "build"], repoDir, deployEnv);
 
   ensureGitIdentity(repoDir);
   run("git", ["add", post.relativePath], repoDir);

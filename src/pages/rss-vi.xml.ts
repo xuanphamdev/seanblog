@@ -8,10 +8,15 @@ const MAX_ITEMS = 30;
 
 export async function GET(context: APIContext) {
   const posts = await getPostsByLang(LANG);
+  const rssSite = new URL(
+    import.meta.env.BASE_URL,
+    context.site ?? site.url,
+  ).href;
+
   return rss({
     title: `${site.title} — VI`,
     description: site.description[LANG],
-    site: context.site ?? site.url,
+    site: rssSite,
     items: posts.slice(0, MAX_ITEMS).map((p) => ({
       title: p.data.title,
       pubDate: p.data.date,

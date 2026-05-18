@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import { withBase } from "./paths";
 import type { Locale } from "./site-config";
 
 export type Post = CollectionEntry<"posts">;
@@ -39,5 +40,5 @@ export async function getPostBySlug(
 
 /** Build the canonical URL path for a post. */
 export function postUrl(post: Post): string {
-  return `/${getPostLocale(post)}/posts/${getPostSlug(post)}/`;
+  return withBase(`/${getPostLocale(post)}/posts/${getPostSlug(post)}/`);
 }
