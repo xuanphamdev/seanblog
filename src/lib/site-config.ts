@@ -6,7 +6,7 @@ export const LOCALES = ["vi", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "vi";
 const siteUrl =
-  import.meta.env.PUBLIC_SITE_URL ?? "https://xuanphamdev.github.io/seanblog";
+  import.meta.env.PUBLIC_SITE_URL ?? "https://blog.reidev.life";
 
 export const site = {
   title: "Seandev",

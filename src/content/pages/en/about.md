@@ -19,4 +19,4 @@ Not every post has a conclusion. Some are just notes. A few are essays. Most are
 - GitHub: [github.com/seandev](https://github.com/seandev)
 - Email: `hello [at] seandev [dot] example`
 
-> Written in Markdown, built with [Astro](https://astro.build), hosted on Cloudflare Pages. Source open on GitHub.
+> Written in Markdown, built with [Astro](https://astro.build), hosted on GitHub Pages. Source open on GitHub.

@@ -19,4 +19,4 @@ Không phải mọi bài đều có kết luận. Một số chỉ là note. Và
 - GitHub: [github.com/seandev](https://github.com/seandev)
 - Email: `hello [at] seandev [dot] example`
 
-> Blog viết bằng Markdown, build bằng [Astro](https://astro.build), host trên Cloudflare Pages. Source mở trên GitHub.
+> Blog viết bằng Markdown, build bằng [Astro](https://astro.build), host trên GitHub Pages. Source mở trên GitHub.

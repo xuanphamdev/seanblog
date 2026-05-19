@@ -43,7 +43,7 @@ npm run check      # astro check (TypeScript)
    ---
    ```
 3. Body in Markdown / MDX.
-4. `git push` → Cloudflare auto-builds (~60s) → live.
+4. `git push` → GitHub Actions auto-builds (~60s) → live.
 
 To link a VI post to its EN translation (or vice versa), set the **same** `translationKey` on both. The TranslationLink in the post header will auto-link them.
 
@@ -121,6 +121,12 @@ src/
 4. Push to `main`. `.github/workflows/deploy-pages.yml` builds and deploys.
 
 Production URL:
+
+```text
+https://blog.reidev.life/
+```
+
+Default GitHub Pages URL:
 
 ```text
 https://xuanphamdev.github.io/seanblog/

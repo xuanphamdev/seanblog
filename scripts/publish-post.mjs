@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import process from "node:process";
 
-const DEFAULT_SITE_URL = "https://xuanphamdev.github.io/seanblog";
+const DEFAULT_SITE_URL = "https://blog.reidev.life";
 const VALID_LANGS = new Set(["vi", "en"]);
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 

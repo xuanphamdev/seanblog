@@ -7,6 +7,12 @@ GitHub Pages via GitHub Actions.
 ## Production URL
 
 ```text
+https://blog.reidev.life/
+```
+
+Default GitHub Pages URL:
+
+```text
 https://xuanphamdev.github.io/seanblog/
 ```
 
@@ -18,12 +24,28 @@ Build environment:
 
 ```text
 DEPLOY_TARGET=github-pages
-SITE_URL=https://xuanphamdev.github.io
-SITE_BASE=/seanblog
-PUBLIC_SITE_URL=https://xuanphamdev.github.io/seanblog
+SITE_URL=https://blog.reidev.life
+SITE_BASE=
+PUBLIC_SITE_URL=https://blog.reidev.life
 ```
 
 The workflow uses Astro's official GitHub Pages action, uploads `dist`, and deploys with `actions/deploy-pages`.
+
+## Custom Domain
+
+GitHub Pages custom domain:
+
+```text
+blog.reidev.life
+```
+
+DNS should include this record at the domain provider:
+
+```text
+Type: CNAME
+Name: blog
+Value: xuanphamdev.github.io
+```
 
 ## Bot Publishing
 

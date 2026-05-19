@@ -9,7 +9,7 @@ translationKey: hello-seandev-2026-05
 
 # Hello
 
-This is the first post on **Seandev**. The blog is built with [Astro](https://astro.build) and Markdown, version-controlled with Git, and deployed via Cloudflare Pages.
+This is the first post on **Seandev**. The blog is built with [Astro](https://astro.build) and Markdown, version-controlled with Git, and deployed via GitHub Pages.
 
 ## Why this blog exists
 

@@ -19,9 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEPLOY_TARGET: github-pages
-      SITE_URL: https://xuanphamdev.github.io
-      SITE_BASE: /seanblog
-      PUBLIC_SITE_URL: https://xuanphamdev.github.io/seanblog
+      SITE_URL: https://blog.reidev.life
+      SITE_BASE: ""
+      PUBLIC_SITE_URL: https://blog.reidev.life
     steps:
       - name: Checkout
         uses: actions/checkout@v6

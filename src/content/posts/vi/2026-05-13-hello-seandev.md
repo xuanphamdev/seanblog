@@ -31,7 +31,7 @@ Phần kỹ thuật mình muốn ghi lại để sau này nhớ:
 - **Tailwind v4** (CSS-first config) + design tokens dùng `oklch()`
 - **Shiki dual-theme** thông qua `astro-expressive-code`
 - **Pagefind** cho static search (offline-friendly, không cần backend)
-- **Cloudflare Pages** hosting, deploy qua `git push`
+- **GitHub Pages** hosting, deploy qua `git push`
 
 ```ts title="src/content.config.ts"
 import { defineCollection, z } from "astro:content";
