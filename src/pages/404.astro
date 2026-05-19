@@ -1,0 +1,28 @@
+---
+import { site } from "../lib/site-config";
+---
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page not found — {site.title}</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <script is:inline>
+      (function () {
+        var prefix = "/seanblog";
+        if (location.pathname === prefix || location.pathname.startsWith(prefix + "/")) {
+          var nextPath = location.pathname.slice(prefix.length) || "/";
+          location.replace(nextPath + location.search + location.hash);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <main>
+      <h1>Page not found</h1>
+      <p><a href="/vi/">Go to homepage</a></p>
+    </main>
+  </body>
+</html>
